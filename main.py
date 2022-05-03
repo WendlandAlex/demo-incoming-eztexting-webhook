@@ -66,7 +66,7 @@ def handle_sms():
     print(request.json)
 
     try:
-        message_type = request.json.get('type')
+        message_type = request.json.get('type', None)
         print(message_type)
         if message_type != 'inbound_text.received':
             abort(404)
