@@ -54,7 +54,7 @@ def send_confirmation(fromNumber, groupNames: list, queue=False):
     else:
         capitalized_groups_string = capitalized_groups[0]
 
-    json_data = {'toNumbers': [fromNumber], 'message': f'Thank for for signing up for {capitalized_groups_string}!'}
+    json_data = {'toNumbers': [fromNumber], 'message': f'Thank you for signing up for {capitalized_groups_string}!'}
     
     response = requests.Request(
         method='POST',
@@ -68,7 +68,7 @@ def send_confirmation(fromNumber, groupNames: list, queue=False):
     # print(response.headers, response.body)
     print(json.loads(response.body).get('message'))
 
-    return flask.Response(json_data.get("message"), 200)
+    return flask.Response(json.dumps({'message': json_data.get("message")}), 200, mimetype="application/json")
 
 if __name__ == '__main__':
     with rq.Connection(redis_conn):

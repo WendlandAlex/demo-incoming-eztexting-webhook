@@ -53,9 +53,9 @@ def main(url, data):
         json=data
     )
 
-    print(response.headers, response.text)
+    # print(response.headers, response.json())
+    print(response.status_code, response.json().get('message'))
 
 if __name__ == '__main__':
     while True:
         main(url_data, generate_body(days_list))
-        time.sleep(0.5)

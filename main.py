@@ -58,7 +58,7 @@ async def dispatch_task(fromNumber=None, message=None):
     if send_confirmation_response is not None:
         return send_confirmation_response
     else:
-        return Response('No valid signup group provided', status=404)
+        return Response(json.dumps({'message': 'No valid signup group provided'}), status=404)
 
 # setup flask webhook handler
 app = Flask(__name__)
