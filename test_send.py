@@ -48,4 +48,4 @@ def main(url, data):
 if __name__ == '__main__':
     while True:
         main(url_data, generate_body(days_list))
-        time.sleep(5)
+        time.sleep(0.5)

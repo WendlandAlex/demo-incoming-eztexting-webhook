@@ -12,15 +12,12 @@ import time
 from dotenv import load_dotenv
 
 from hmacSHA1 import generate_hash_bytes
+from in_tasks import in_queues, parse_regex
 
 load_dotenv()
 test_webhook    = os.getenv('NGROK', None)
 signing_key = os.getenv('WEBHOOK_SECRET_KEY', None)
-redis_conn = redis.from_url(os.getenv('REDIS_URL', 'redis://localhost:6379'))
-in_queue = rq.Queue('handle_sms', connection=redis_conn)
-out_queues = [
-    rq.Queue('send_confirmation', connection=redis_conn)
-    ]
+
 
 # Webhook documentation
 # https://developers.eztexting.com/docs/webhooks-1
@@ -48,18 +45,8 @@ def validate_hmac_header(header, body, signing_key: str):
 
     return False
 
-def send_confirmation(fromNumber, group):
-    print(f'Congratulations {fromNumber}! You have signed up for {group}')
-
-def extract_weekday_from_sms(message: str, fromNumber: str=None, id: str=None):
-    days_of_week_regex_pattern = re.compile('(mon|tues|wednes|thurs|fri|satur|sun)day')
-    signup_day_matches = re.findall(days_of_week_regex_pattern, message)
-    
-    for availability_bucket in signup_day_matches:
-        out_queues[0].enqueue(send_confirmation, fromNumber, availability_bucket)
-
+# setup flask webhook handler
 app = Flask(__name__)
-
 @app.route('/inbound_sms_received', methods=['POST'])
 def handle_sms():
     print(request.headers)
@@ -78,7 +65,11 @@ def handle_sms():
         
     if not is_valid: abort(403)
 
-    return Response(status=200, response=f'Received your text \"{request.json.get("message")}\"')
+    if in_queues.get('parse_regex').enqueue(parse_regex, message=request.json.get('message'), fromNumber=request.json.get('fromNumber')):
+        return Response(status=200, response='Received your text!')
+    
+    else:
+        abort(502)
 
     
 if __name__ == '__main__':
