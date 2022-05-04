@@ -54,8 +54,6 @@ def send_confirmation(fromNumber, groupNames: list, queue=False):
     else:
         capitalized_groups_string = capitalized_groups[0]
 
-        print(capitalized_groups_string)
-
     json_data = {'toNumbers': [fromNumber], 'message': f'Thank for for signing up for {capitalized_groups_string}!'}
     
     response = requests.Request(

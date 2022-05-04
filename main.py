@@ -16,7 +16,7 @@ from out_tasks import out_queues, modify_group_membership, send_confirmation
 
 load_dotenv()
 test_webhook    = os.getenv('NGROK', None)
-signing_key = os.getenv('WEBHOOK_SECRET_KEY', None)
+signing_key     = os.getenv('WEBHOOK_SECRET_KEY', None)
 
 
 # Webhook documentation
@@ -48,12 +48,6 @@ def validate_hmac_header(header, body, signing_key: str):
 
 
 async def dispatch_task(fromNumber=None, message=None):
-    # if in_queues.get('parse_regex').enqueue(parse_regex, message=message, fromNumber=fromNumber):
-    #     return Response(status=200, response='Received your text!')
-
-    # else:
-    #     return Response(status=500)
-
     send_confirmation_response = None
 
     groupNames = parse_regex(message, fromNumber, queue=False)
@@ -81,7 +75,7 @@ async def handle_sms():
             abort(404)
     except Exception as e:
         print(e)
-        abort(404)
+        abort(400)
 
     if not validate_hmac_header(request.headers.get('X-Signature'), request.json, signing_key):
         abort(403)
