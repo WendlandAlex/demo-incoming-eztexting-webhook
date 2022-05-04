@@ -1,13 +1,10 @@
 from flask import Flask, abort, request, Response
-import redis
 import requests
 import json
 import base64
 import hashlib
 import hmac
 import os
-import rq
-import re
 import time
 from dotenv import load_dotenv
 
@@ -28,6 +25,7 @@ signing_key = os.getenv('WEBHOOK_SECRET_KEY', None)
     is coming from EZ Texting.
 """
 
+
 def validate_hmac_header(header, body, signing_key: str):
     hashed_body_bytes = generate_hash_bytes(body, signing_key) # returns a hashlib object
 
@@ -45,8 +43,10 @@ def validate_hmac_header(header, body, signing_key: str):
 
     return False
 
+
 # setup flask webhook handler
 app = Flask(__name__)
+
 @app.route('/inbound_sms_received', methods=['POST'])
 def handle_sms():
     print(request.headers)
