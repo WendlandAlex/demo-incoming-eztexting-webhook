@@ -13,7 +13,7 @@ dotenv.load_dotenv()
 url_data = os.getenv('NGROK')
 signing_key = os.getenv('WEBHOOK_SECRET_KEY')
 
-days_list = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+days_list = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday', 'Wednesday and Friday!', 'Wednesday\, Thursday\, and fRiDaY!', " ", "unsubscribe"]
 
 def generate_body(inputs_list):
     i = random.randint(0,len(inputs_list)-1)

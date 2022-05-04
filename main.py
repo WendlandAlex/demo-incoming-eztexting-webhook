@@ -1,4 +1,6 @@
+import queue
 from flask import Flask, abort, request, Response
+import asyncio
 import requests
 import json
 import base64
@@ -10,6 +12,7 @@ from dotenv import load_dotenv
 
 from hmacSHA1 import generate_hash_bytes
 from in_tasks import in_queues, parse_regex
+from out_tasks import out_queues, modify_group_membership, send_confirmation
 
 load_dotenv()
 test_webhook    = os.getenv('NGROK', None)
@@ -44,13 +47,32 @@ def validate_hmac_header(header, body, signing_key: str):
     return False
 
 
+async def dispatch_task(fromNumber=None, message=None):
+    # if in_queues.get('parse_regex').enqueue(parse_regex, message=message, fromNumber=fromNumber):
+    #     return Response(status=200, response='Received your text!')
+
+    # else:
+    #     return Response(status=500)
+
+    send_confirmation_response = None
+
+    groupNames = parse_regex(message, fromNumber, queue=False)
+    if groupNames is not None:
+        if modify_group_membership(fromNumber, groupNames, queue=False): 
+            send_confirmation_response = send_confirmation(fromNumber, groupNames, queue=False)
+
+    if send_confirmation_response is not None:
+        return send_confirmation_response
+    else:
+        return Response('No valid signup group provided', status=404)
+
 # setup flask webhook handler
 app = Flask(__name__)
 
 @app.route('/inbound_sms_received', methods=['POST'])
-def handle_sms():
-    print(request.headers)
-    print(request.json)
+async def handle_sms():
+    # print(request.headers)
+    # print(request.json)
 
     try:
         message_type = request.json.get('type', None)
@@ -61,16 +83,10 @@ def handle_sms():
         print(e)
         abort(404)
 
-    is_valid = validate_hmac_header(request.headers.get('X-Signature'), request.json, signing_key)
-        
-    if not is_valid: abort(403)
+    if not validate_hmac_header(request.headers.get('X-Signature'), request.json, signing_key):
+        abort(403)
 
-    if in_queues.get('parse_regex').enqueue(parse_regex, message=request.json.get('message'), fromNumber=request.json.get('fromNumber')):
-        return Response(status=200, response='Received your text!')
-    
-    else:
-        abort(502)
-
+    return await dispatch_task(fromNumber=request.json.get('fromNumber'), message=request.json.get('message'))
     
 if __name__ == '__main__':
     app.run(port=8080)
