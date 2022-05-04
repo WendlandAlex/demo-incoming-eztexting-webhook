@@ -3,6 +3,7 @@ import re
 import redis
 import requests
 import rq
+import json
 
 session = requests.Session()
 redis_conn = redis.from_url(os.getenv('REDIS_URL', 'redis://localhost:6379'))
@@ -49,7 +50,7 @@ def modify_group_membership(fromNumber, groupNames):
 
 def send_confirmation(fromNumber, groupNames: list):
     modify_group_membership(fromNumber, groupNames)
-    json_data = {'toNumbers': [fromNumber], 'message': f'Thank for for signing up for {" ".join(groupNames)}'}
+    json_data = {'toNumbers': [fromNumber], 'message': f'Thank for for signing up for {" ".join(groupNames).capitalize()}'}
     
     response = requests.Request(
         method='POST',
@@ -60,7 +61,8 @@ def send_confirmation(fromNumber, groupNames: list):
 
     response = response.prepare()
 
-    print(response.headers, response.body)
+    # print(response.headers, response.body)
+    print(json.loads(response.body).get('message'))
 
     return True
 
