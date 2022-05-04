@@ -9,12 +9,12 @@ import time
 from dotenv import load_dotenv
 
 from hmacSHA1 import generate_hash_bytes
+from in_tasks import in_queues, parse_regex
 
 load_dotenv()
 test_webhook    = os.getenv('NGROK', None)
 signing_key = os.getenv('WEBHOOK_SECRET_KEY', None)
 
-app = Flask(__name__)
 
 # Webhook documentation
 # https://developers.eztexting.com/docs/webhooks-1
@@ -44,6 +44,9 @@ def validate_hmac_header(header, body, signing_key: str):
     return False
 
 
+# setup flask webhook handler
+app = Flask(__name__)
+
 @app.route('/inbound_sms_received', methods=['POST'])
 def handle_sms():
     print(request.headers)
@@ -62,7 +65,11 @@ def handle_sms():
         
     if not is_valid: abort(403)
 
-    return Response(status=200, response=f'Received your text \"{request.json.get("message")}\"')
+    if in_queues.get('parse_regex').enqueue(parse_regex, message=request.json.get('message'), fromNumber=request.json.get('fromNumber')):
+        return Response(status=200, response='Received your text!')
+    
+    else:
+        abort(502)
 
     
 if __name__ == '__main__':

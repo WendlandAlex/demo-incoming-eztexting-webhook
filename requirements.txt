@@ -1,5 +1,6 @@
 flask
+flask-rq # called as flask_rq
 requests
-python-dotenv
+python-dotenv # called as dotenv
 redis
 rq
