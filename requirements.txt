@@ -1,5 +1,6 @@
 flask
 flask-rq # called as flask_rq
+hashlib
 asyncio
 flask[Async]
 requests

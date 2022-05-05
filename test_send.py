@@ -48,7 +48,7 @@ def generate_header_sig(body):
 
 def main(url, data):
     response = requests.post(
-        url=url+'/inbound_sms_received',
+        url=url+'/inbound_text_received',
         headers=generate_header_sig(data),
         json=data
     )

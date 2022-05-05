@@ -63,7 +63,7 @@ async def dispatch_task(fromNumber=None, message=None):
 # setup flask webhook handler
 app = Flask(__name__)
 
-@app.route('/inbound_sms_received', methods=['POST'])
+@app.route('/inbound_text_received', methods=['POST'])
 async def handle_sms():
     # print(request.headers)
     # print(request.json)
